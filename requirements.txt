@@ -1,0 +1,8 @@
+daily-python
+pyaudio
+requests 
+aiohttp
+pyaudio
+python-dotenv
+numpy
+openwakeword
