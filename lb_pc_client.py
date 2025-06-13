@@ -71,9 +71,10 @@ def get_creds(auth_api_url: str | None = None, device_id: str | None = None) -> 
 
 # Main application class
 class App(EventHandler):
-    def __init__(self, sample_rate=16000, num_channels=1):
+    def __init__(self, sample_out_rate=16000, sample_in_rate=44100, num_channels=1):
         self._client = CallClient(event_handler=self)
-        self._sample_rate = sample_rate
+        self._sample_rate = sample_out_rate
+        self._sample_in_rate = sample_in_rate
         self._num_channels = num_channels
 
         self._pyaudio = pyaudio.PyAudio()
@@ -88,7 +89,7 @@ class App(EventHandler):
         self._audio_out_stream = self._pyaudio.open(
             format=pyaudio.paInt16,
             channels=self._num_channels,
-            rate=self._sample_rate,
+            rate=self._sample_in_rate,
             output=True
         )
 
@@ -115,7 +116,7 @@ class App(EventHandler):
         print(f"Participant {participant.get('user_name', 'Guest')} ({participant_id}) joined. Subscribing to their audio.")
         # Subscribe to this participant and set the audio renderer
         self._client.update_subscriptions({participant_id: {"media": {"audio": True, "video": False}}})
-        self._client.set_audio_renderer(participant_id, self.on_audio_out)
+        self._client.set_audio_renderer(participant_id, self.on_audio_out, sample_rate=self._sample_in_rate)
 
     def on_participant_left(self, participant, reason):
         participant_id = participant.get("id")
